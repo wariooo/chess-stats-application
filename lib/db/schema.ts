@@ -128,6 +128,99 @@ export type TeamDataWithMembers = Team & {
   })[];
 };
 
+// Chess puzzle tables
+export const chessGames = pgTable('chess_games', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id),
+  chesscomUrl: text('chesscom_url').notNull(),
+  white: varchar('white', { length: 100 }).notNull(),
+  black: varchar('black', { length: 100 }).notNull(),
+  whiteElo: integer('white_elo'),
+  blackElo: integer('black_elo'),
+  result: varchar('result', { length: 10 }).notNull(),
+  timeControl: varchar('time_control', { length: 50 }),
+  pgn: text('pgn').notNull(),
+  playedAt: timestamp('played_at').notNull(),
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+export const puzzles = pgTable('puzzles', {
+  id: serial('id').primaryKey(),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id),
+  gameId: integer('game_id')
+    .notNull()
+    .references(() => chessGames.id),
+  fen: text('fen').notNull(),
+  sideToMove: varchar('side_to_move', { length: 5 }).notNull(),
+  solution: text('solution').notNull(), // JSON array of UCI moves
+  solutionSan: text('solution_san').notNull(), // JSON array of SAN moves
+  themes: text('themes').notNull(), // JSON array of theme IDs
+  difficulty: integer('difficulty').notNull(),
+  moveNumber: integer('move_number').notNull(),
+  playerFoundIt: integer('player_found_it').notNull().default(0), // 0 or 1 (boolean)
+  explanation: text('explanation').notNull(), // JSON object with context, keyIdea, etc.
+  createdAt: timestamp('created_at').notNull().defaultNow(),
+});
+
+export const puzzleAttempts = pgTable('puzzle_attempts', {
+  id: serial('id').primaryKey(),
+  puzzleId: integer('puzzle_id')
+    .notNull()
+    .references(() => puzzles.id),
+  userId: integer('user_id')
+    .notNull()
+    .references(() => users.id),
+  solved: integer('solved').notNull().default(0), // 0 or 1 (boolean)
+  attempts: integer('attempts').notNull().default(1),
+  hintsUsed: integer('hints_used').notNull().default(0),
+  timeSpent: integer('time_spent').notNull().default(0), // milliseconds
+  attemptedAt: timestamp('attempted_at').notNull().defaultNow(),
+});
+
+// Relations
+export const chessGamesRelations = relations(chessGames, ({ one, many }) => ({
+  user: one(users, {
+    fields: [chessGames.userId],
+    references: [users.id],
+  }),
+  puzzles: many(puzzles),
+}));
+
+export const puzzlesRelations = relations(puzzles, ({ one, many }) => ({
+  user: one(users, {
+    fields: [puzzles.userId],
+    references: [users.id],
+  }),
+  game: one(chessGames, {
+    fields: [puzzles.gameId],
+    references: [chessGames.id],
+  }),
+  attempts: many(puzzleAttempts),
+}));
+
+export const puzzleAttemptsRelations = relations(puzzleAttempts, ({ one }) => ({
+  puzzle: one(puzzles, {
+    fields: [puzzleAttempts.puzzleId],
+    references: [puzzles.id],
+  }),
+  user: one(users, {
+    fields: [puzzleAttempts.userId],
+    references: [users.id],
+  }),
+}));
+
+// Types
+export type ChessGame = typeof chessGames.$inferSelect;
+export type NewChessGame = typeof chessGames.$inferInsert;
+export type Puzzle = typeof puzzles.$inferSelect;
+export type NewPuzzle = typeof puzzles.$inferInsert;
+export type PuzzleAttempt = typeof puzzleAttempts.$inferSelect;
+export type NewPuzzleAttempt = typeof puzzleAttempts.$inferInsert;
+
 export enum ActivityType {
   SIGN_UP = 'SIGN_UP',
   SIGN_IN = 'SIGN_IN',

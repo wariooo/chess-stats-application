@@ -95,6 +95,11 @@ export default function HomePage() {
               <p className="text-gray-600">
                 Custom puzzles based on your own games and common mistakes
               </p>
+              <Link href="/puzzles" className="block mt-3">
+                <button className="text-orange-500 hover:text-orange-600 text-sm font-medium">
+                  Try Puzzle Generator →
+                </button>
+              </Link>
             </div>
           </div>
         </div>
