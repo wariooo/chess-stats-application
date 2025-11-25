@@ -57,3 +57,9 @@ export async function setSession(user: NewUser) {
     sameSite: 'lax',
   });
 }
+
+export async function getUser() {
+  const session = await getSession();
+  if (!session) return null;
+  return session.user;
+}
