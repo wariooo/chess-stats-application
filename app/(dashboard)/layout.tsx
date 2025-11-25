@@ -93,22 +93,7 @@ function Header() {
           <span className="text-xl font-semibold text-white">Claude Chess</span>
         </Link>
         <div className="flex items-center gap-4">
-          <Link href="/pricing">
-            <Button
-              variant="outline"
-              className="bg-transparent border-gray-600 text-white hover:bg-gray-700 hover:text-white px-6"
-            >
-              Pricing
-            </Button>
-          </Link>
-          <Link href="/sign-in">
-            <Button
-              variant="outline"
-              className="bg-transparent border-gray-600 text-white hover:bg-gray-700 hover:text-white px-6"
-            >
-              Sign in
-            </Button>
-          </Link>
+          <UserMenu />
         </div>
       </div>
     </header>
